@@ -1,0 +1,23 @@
+name: Sync with Upstream
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # 每 6 小时同步一次（UTC 时间），可按需修改
+  workflow_dispatch:          # 允许在 Actions 页面手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    # 仅在当前仓库是 Fork 时运行，避免在源仓库中误触发
+    if: github.event.repository.fork
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync upstream changes
+        uses: aormsby/Fork-Sync-With-Upstream-action@83d78e8c4bf524e79b091cf257deba4dee9e60df # v3.4.3, 固定完整 SHA 更安全
+        with:
+          target_sync_branch: main                          # Fork 中需要同步的分支
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}    # 自动生成的 Token，无需手动配置
+          upstream_sync_repo: aimod-cc/Agent2API            # 上游仓库
+          upstream_sync_branch: main                        # 上游仓库的源分支
